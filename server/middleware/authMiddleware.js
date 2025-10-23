@@ -1,0 +1,31 @@
+import jwt from 'jsonwebtoken'
+import User from '../models/User.js'
+
+export const protect = async (req, res, next) => {
+	try {
+		const token = req.cookies?.token || req.cookies?.jwt
+
+		if (!token) {
+			return res.status(401).json({ message: 'Token topilmadi, ruxsat yo‘q' })
+		}
+
+		const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+		const user = await User.findById(decoded.id).select('-password')
+		if (!user)
+			return res.status(404).json({ message: 'Foydalanuvchi topilmadi' })
+
+		req.user = user
+		next()
+	} catch (err) {
+		console.error('AUTH ERROR:', err)
+		res.status(401).json({ message: 'Noto‘g‘ri token yoki muddati o‘tgan' })
+	}
+}
+export const admin = (req, res, next) => {
+	if (req.user && (req.user.isAdmin || req.user.role === 'admin')) {
+		next()
+	} else {
+		return res.status(403).json({ message: 'Admin rights required' })
+	}
+}
