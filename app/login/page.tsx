@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { OrderStore } from '@/lib/order-store'
+
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import type React from 'react'
@@ -26,8 +26,6 @@ export default function LoginPage() {
 	const [isLoading, setIsLoading] = useState(false)
 	const [errors, setErrors] = useState<{ [key: string]: string }>({})
 	const router = useRouter()
-
-	const orderStore = OrderStore.getInstance()
 
 	const handleInputChange = (field: string, value: string) => {
 		setFormData(prev => ({ ...prev, [field]: value }))
@@ -64,7 +62,11 @@ export default function LoginPage() {
 		setIsLoading(true)
 
 		try {
-			const res = await axios.post('/api/auth/login', formData)
+			const res = await axios.post(
+				`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,
+				formData,
+				{ withCredentials: true }
+			)
 			const data = res.data
 
 			Cookies.set('token', res.data.token, { expires: 1 })

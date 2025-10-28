@@ -71,7 +71,9 @@ export default function CheckoutPage() {
 
 			const items = await Promise.all(
 				cart.map(async (item: { productId: string; quantity: number }) => {
-					const res = await axios.get(`/api/products/${item.productId}`)
+					const res = await axios.get(
+						`${process.env.NEXT_PUBLIC_API_URL}/api/products/${item.productId}`
+					)
 					return {
 						productId: res.data._id,
 						name: res.data.name,
@@ -103,7 +105,11 @@ export default function CheckoutPage() {
 		}
 
 		try {
-			const res = await axios.post('/api/orders', orderData)
+			const res = await axios.post(
+				`${process.env.NEXT_PUBLIC_API_URL}/api/orders`,
+				orderData,
+				{ withCredentials: true }
+			)
 			console.log('Order created:', res.data)
 			localStorage.setItem('pendingOrder', JSON.stringify(res.data))
 			router.push('/payment')

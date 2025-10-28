@@ -99,7 +99,10 @@ export default function OrdersPage() {
 		setLoading(true)
 		try {
 			// withCredentials true to send cookies (JWT) to backend
-			const res = await axios.get('/api/orders', { withCredentials: true })
+			const res = await axios.get(
+				`${process.env.NEXT_PUBLIC_API_URL}/api/orders`,
+				{ withCredentials: true }
+			)
 			setOrders(res.data || [])
 		} catch (err: any) {
 			console.error('Orders fetch error:', err)
@@ -186,7 +189,8 @@ export default function OrdersPage() {
 	const handleStatusUpdate = async (orderId: string, newStatus: string) => {
 		try {
 			const res = await axios.put(
-				`/api/orders/${orderId}`,
+				`${process.env.NEXT_PUBLIC_API_URL}/api/orders/${orderId}`,
+
 				{ status: newStatus },
 				{ withCredentials: true }
 			)

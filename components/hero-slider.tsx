@@ -32,8 +32,8 @@ const slides: SlideContent[] = [
 		subtitle:
 			'Discover cutting-edge electronics designed for performance and innovation.From transistors to smart devices — everything you need in one place.',
 
-		buttonText: 'Shop Fashion',
-		buttonLink: '#clothing',
+		buttonText: 'Shop Electronics',
+		buttonLink: '#electronics',
 	},
 	{
 		type: 'image',
@@ -41,8 +41,8 @@ const slides: SlideContent[] = [
 		title: 'SMD Components',
 		subtitle:
 			'Create the perfect living space with our premium home decor and furniture collection',
-		buttonText: 'Shop Home',
-		buttonLink: '#home',
+		buttonText: 'Contact Us',
+		buttonLink: '/register',
 	},
 	{
 		type: 'image',
@@ -51,8 +51,8 @@ const slides: SlideContent[] = [
 		subtitle:
 			'Explore our newest electronic components and smart devices.Shop today and power your next big idea!',
 
-		buttonText: 'Shop Accessories',
-		buttonLink: '#accessories',
+		buttonText: 'shop Now ',
+		buttonLink: '#components',
 	},
 	{
 		type: 'image',

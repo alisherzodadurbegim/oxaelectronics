@@ -3,8 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card'
 import axios from 'axios'
 import { useRouter } from 'next/navigation'
-import type React from 'react'
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 
 const LoaderIcon = () => (
 	<svg
@@ -40,56 +39,79 @@ export default function AuthGuard({
 	const router = useRouter()
 
 	useEffect(() => {
+		let isMounted = true
+
 		const checkAuth = async () => {
 			try {
-				const res = await axios.get('/api/auth/me')
+				const res = await axios.get(
+					`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`,
+					{ withCredentials: true }
+				)
 
 				const user = res.data.user
 
+				// ✅ Agar admin kerak bo‘lsa, tekshiramiz
 				if (requireAdmin && user.role !== 'admin') {
-					router.push('/login')
+					if (isMounted) {
+						setIsAuthorized(false)
+						router.replace('/login')
+					}
 					return
 				}
 
+				// ✅ Agar oddiy foydalanuvchi bo‘lsa
 				if (requireAuth && !user.email) {
-					router.push(redirectTo)
+					if (isMounted) {
+						setIsAuthorized(false)
+						router.replace(redirectTo)
+					}
 					return
 				}
 
-				setIsAuthorized(true)
+				if (isMounted) {
+					setIsAuthorized(true)
+				}
 			} catch (err) {
 				console.error('Auth check failed:', err)
 				if (requireAuth || requireAdmin) {
-					router.push(redirectTo)
+					if (isMounted) {
+						setIsAuthorized(false)
+						router.replace(redirectTo)
+					}
 					return
 				}
-				setIsAuthorized(true)
+				if (isMounted) {
+					setIsAuthorized(true)
+				}
 			} finally {
-				setIsLoading(false)
+				if (isMounted) setIsLoading(false)
 			}
 		}
 
 		checkAuth()
+		return () => {
+			isMounted = false
+		}
 	}, [requireAuth, requireAdmin, redirectTo, router])
 
 	if (isLoading) {
 		return (
-			<div className='min-h-screen bg-background flex items-center justify-center'>
+			<div className='min-h-screen flex items-center justify-center'>
 				<Card>
-					<CardContent className='p-6'>
-						<div className='flex items-center gap-2'>
-							<LoaderIcon />
-							<span>loading...</span>
-						</div>
+					<CardContent className='p-6 flex items-center gap-2'>
+						<LoaderIcon />
+						<span>Please wait...</span>
 					</CardContent>
 				</Card>
 			</div>
 		)
 	}
 
+	// ❌ Agar ruxsat yo‘q — hech narsa ko‘rsatmaymiz
 	if (!isAuthorized) {
 		return null
 	}
 
+	// ✅ Faqat ruxsat bo‘lsa children chiqadi
 	return <>{children}</>
 }

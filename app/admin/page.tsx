@@ -2,6 +2,8 @@
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+
+import AuthGuard from '@/components/auth-guard'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
@@ -152,19 +154,25 @@ export default function AdminDashboardContent() {
 	useEffect(() => {
 		// Orders
 		axios
-			.get('/api/orders')
+			.get(`${process.env.NEXT_PUBLIC_API_URL}/api/orders`, {
+				withCredentials: true,
+			})
 			.then(res => setOrders(res.data))
 			.catch(err => console.error(err))
 
 		// Products
 		axios
-			.get('/api/products')
+			.get(`${process.env.NEXT_PUBLIC_API_URL}/api/products`, {
+				withCredentials: true,
+			})
 			.then(res => setProducts(res.data))
 			.catch(err => console.error(err))
 
 		// Users
 		axios
-			.get('/api/admin/users')
+			.get(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users`, {
+				withCredentials: true,
+			})
 			.then(res => setUsers(res.data))
 			.catch(err => console.error(err))
 	}, [])
@@ -214,233 +222,118 @@ export default function AdminDashboardContent() {
 		.slice(0, 3)
 
 	return (
-		<div className='min-h-screen bg-background'>
-			{/* Header */}
-			<header className='border-b bg-card'>
-				<div className='container mx-auto px-4 sm:px-6 lg:px-8'>
-					<div className='flex h-16 items-center justify-between'>
-						<div className='flex items-center gap-4'>
-							<Link
-								href='/'
-								className='flex items-center gap-2 hover:text-primary'
-							>
-								<ArrowLeftIcon /> Back to Store
-							</Link>
-							<div className='h-6 w-px bg-border' />
-							<h1 className='text-xl font-semibold'>Admin Dashboard</h1>
-						</div>
-						<div className='flex items-center gap-2'>
-							<Link href='/admin/products'>
-								<Button variant='outline' size='sm'>
-									<PlusIcon /> Add Product
+		<AuthGuard requireAuth requireAdmin>
+			<div className='min-h-screen bg-background'>
+				{/* Header */}
+				<header className='border-b bg-card'>
+					<div className='container mx-auto px-4 sm:px-6 lg:px-8'>
+						<div className='flex h-16 items-center justify-between'>
+							<div className='flex items-center gap-4'>
+								<Link
+									href='/'
+									className='flex items-center gap-2 hover:text-primary'
+								>
+									<ArrowLeftIcon /> Back to Store
+								</Link>
+								<div className='h-6 w-px bg-border' />
+								<h1 className='text-xl font-semibold'>Admin Dashboard</h1>
+							</div>
+							<div className='flex items-center gap-2'>
+								<Link href='/admin/products'>
+									<Button variant='outline' size='sm'>
+										<PlusIcon /> Add Product
+									</Button>
+								</Link>
+								<Button
+									variant='outline'
+									size='sm'
+									onClick={() => {
+										localStorage.removeItem('user')
+										router.push('/')
+									}}
+								>
+									<LogOutIcon /> Logout
 								</Button>
-							</Link>
-							<Button
-								variant='outline'
-								size='sm'
-								onClick={() => {
-									localStorage.removeItem('user')
-									router.push('/')
-								}}
-							>
-								<LogOutIcon /> Logout
-							</Button>
+							</div>
 						</div>
 					</div>
-				</div>
-			</header>
+				</header>
 
-			<div className='container mx-auto px-4 sm:px-6 lg:px-8 py-8'>
-				<Tabs
-					value={activeTab}
-					onValueChange={val => setActiveTab(val)}
-					className='space-y-6'
-				>
-					<TabsList className='grid w-full grid-cols-4'>
-						<TabsTrigger value='overview'>Overview</TabsTrigger>
-						<TabsTrigger
-							value='products'
-							onClick={() => router.push('/admin/products')}
-						>
-							Products
-						</TabsTrigger>
-						<TabsTrigger
-							value='orders'
-							onClick={() => router.push('/admin/orders')}
-						>
-							Orders
-						</TabsTrigger>
-						<TabsTrigger value='customers'>Customers</TabsTrigger>
-					</TabsList>
+				<div className='container mx-auto px-4 sm:px-6 lg:px-8 py-8'>
+					<Tabs
+						value={activeTab}
+						onValueChange={val => setActiveTab(val)}
+						className='space-y-6'
+					>
+						<TabsList className='grid w-full grid-cols-4'>
+							<TabsTrigger value='overview'>Overview</TabsTrigger>
+							<TabsTrigger
+								value='products'
+								onClick={() => router.push('/admin/products')}
+							>
+								Products
+							</TabsTrigger>
+							<TabsTrigger
+								value='orders'
+								onClick={() => router.push('/admin/orders')}
+							>
+								Orders
+							</TabsTrigger>
+							<TabsTrigger value='customers'>Customers</TabsTrigger>
+						</TabsList>
 
-					<TabsContent value='overview' className='space-y-6'>
-						{/* Stats Cards */}
-						<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
-							<Card>
-								<CardHeader className='flex justify-between pb-2'>
-									<CardTitle className='text-sm font-medium'>
-										Total Revenue
-									</CardTitle>
-									<DollarSignIcon />
-								</CardHeader>
-								<CardContent>
-									<div className='text-2xl font-bold'>
-										{new Intl.NumberFormat('uz-UZ', {
-											style: 'currency',
-											currency: 'UZS',
-											currencyDisplay: 'code',
-											minimumFractionDigits: 0,
-										}).format(stats.totalRevenue)}
-									</div>
-								</CardContent>
-							</Card>
-
-							<Card>
-								<CardHeader className='flex justify-between pb-2'>
-									<CardTitle className='text-sm font-medium'>
-										Total Orders
-									</CardTitle>
-									<ShoppingCartIcon />
-								</CardHeader>
-								<CardContent>
-									<div className='text-2xl font-bold'>{stats.totalOrders}</div>
-								</CardContent>
-							</Card>
-
-							<Card>
-								<CardHeader className='flex justify-between pb-2'>
-									<CardTitle className='text-sm font-medium'>
-										Total Products
-									</CardTitle>
-									<PackageIcon />
-								</CardHeader>
-								<CardContent>
-									<div className='text-2xl font-bold'>
-										{stats.totalProducts}
-									</div>
-								</CardContent>
-							</Card>
-
-							<Card>
-								<CardHeader className='flex justify-between pb-2'>
-									<CardTitle className='text-sm font-medium'>
-										Total Customers
-									</CardTitle>
-									<UsersIcon />
-								</CardHeader>
-								<CardContent>
-									<div className='text-2xl font-bold'>
-										{stats.totalCustomers}
-									</div>
-								</CardContent>
-							</Card>
-						</div>
-
-						{/* Recent Orders */}
-						<Card>
-							<CardHeader>
-								<CardTitle className='flex items-center gap-2'>
-									<ShoppingCartIcon /> Recent Orders
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className='space-y-4'>
-									{recentOrders.map(order => (
-										<div
-											key={order._id}
-											className='flex justify-between p-3 border rounded-lg'
-										>
-											<div>
-												<p className='font-medium'>{order.email}</p>
-												<p className='text-sm text-muted-foreground'>
-													{order.shippingAddress.firstName}{' '}
-													{order.shippingAddress.lastName}
-												</p>
-												<p className='text-xs text-muted-foreground'>
-													{new Date(order.createdAt).toLocaleDateString()}
-												</p>
-											</div>
-											<div className='text-right'>
-												<p className='font-medium'>
-													{formatPrice(order.total)}
-												</p>
-												<Badge
-													className={`text-xs ${getStatusColor(order.status)}`}
-												>
-													{order.status}
-												</Badge>
-											</div>
-										</div>
-									))}
-								</div>
-								<Link href='/admin/orders'>
-									<Button variant='outline' className='w-full mt-4'>
-										View All Orders
-									</Button>
-								</Link>
-							</CardContent>
-						</Card>
-
-						{/* Top Products */}
-						<Card>
-							<CardHeader>
-								<CardTitle className='flex items-center gap-2'>
-									<TrendingUpIcon />
-									Top Products
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className='space-y-4'>
-									{topProducts.map(product => (
-										<div
-											key={product._id || product.id}
-											className='flex items-center justify-between p-3 border rounded-lg'
-										>
-											<div>
-												<p className='font-medium'>{product.name}</p>
-												<p className='text-sm text-muted-foreground'>
-													{product.sales} sales
-												</p>
-												<p className='text-xs text-muted-foreground'>
-													Stock: {product.stock}
-												</p>
-											</div>
-											<div className='text-right'>
-												<p className='font-medium'>
-													{new Intl.NumberFormat('uz-UZ', {
-														style: 'currency',
-														currency: 'UZS',
-														currencyDisplay: 'code',
-														minimumFractionDigits: 0,
-													}).format(stats.totalRevenue)}
-												</p>
-												{product.stock < 10 && (
-													<Badge variant='destructive' className='text-xs'>
-														Low Stock
-													</Badge>
-												)}
-											</div>
-										</div>
-									))}
-								</div>
-								<Link href='/admin/products'>
-									<Button
-										variant='outline'
-										className='w-full mt-4 bg-transparent'
-									>
-										View All Products
-									</Button>
-								</Link>
-							</CardContent>
-						</Card>
-					</TabsContent>
-
-					<TabsContent value='customers'>
-						<div className='space-y-6'>
-							{/* Customer Stats */}
-							<div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+						<TabsContent value='overview' className='space-y-6'>
+							{/* Stats Cards */}
+							<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6'>
 								<Card>
-									<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+									<CardHeader className='flex justify-between pb-2'>
+										<CardTitle className='text-sm font-medium'>
+											Total Revenue
+										</CardTitle>
+										<DollarSignIcon />
+									</CardHeader>
+									<CardContent>
+										<div className='text-2xl font-bold'>
+											{new Intl.NumberFormat('uz-UZ', {
+												style: 'currency',
+												currency: 'UZS',
+												currencyDisplay: 'code',
+												minimumFractionDigits: 0,
+											}).format(stats.totalRevenue)}
+										</div>
+									</CardContent>
+								</Card>
+
+								<Card>
+									<CardHeader className='flex justify-between pb-2'>
+										<CardTitle className='text-sm font-medium'>
+											Total Orders
+										</CardTitle>
+										<ShoppingCartIcon />
+									</CardHeader>
+									<CardContent>
+										<div className='text-2xl font-bold'>
+											{stats.totalOrders}
+										</div>
+									</CardContent>
+								</Card>
+
+								<Card>
+									<CardHeader className='flex justify-between pb-2'>
+										<CardTitle className='text-sm font-medium'>
+											Total Products
+										</CardTitle>
+										<PackageIcon />
+									</CardHeader>
+									<CardContent>
+										<div className='text-2xl font-bold'>
+											{stats.totalProducts}
+										</div>
+									</CardContent>
+								</Card>
+
+								<Card>
+									<CardHeader className='flex justify-between pb-2'>
 										<CardTitle className='text-sm font-medium'>
 											Total Customers
 										</CardTitle>
@@ -448,141 +341,262 @@ export default function AdminDashboardContent() {
 									</CardHeader>
 									<CardContent>
 										<div className='text-2xl font-bold'>
-											{customerStats.totalCustomers}
+											{stats.totalCustomers}
 										</div>
-										<p className='text-xs text-muted-foreground'>
-											Registered users
-										</p>
-									</CardContent>
-								</Card>
-
-								<Card>
-									<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-										<CardTitle className='text-sm font-medium'>
-											New Customers
-										</CardTitle>
-										<UsersIcon />
-									</CardHeader>
-									<CardContent>
-										<div className='text-2xl font-bold'>
-											{customerStats.newCustomers}
-										</div>
-										<p className='text-xs text-muted-foreground'>
-											First-time buyers
-										</p>
-									</CardContent>
-								</Card>
-
-								<Card>
-									<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-										<CardTitle className='text-sm font-medium'>
-											Returning Customers
-										</CardTitle>
-										<UsersIcon />
-									</CardHeader>
-									<CardContent>
-										<div className='text-2xl font-bold'>
-											{customerStats.returningCustomers}
-										</div>
-										<p className='text-xs text-muted-foreground'>
-											Repeat buyers
-										</p>
 									</CardContent>
 								</Card>
 							</div>
 
-							{/* Customer List */}
+							{/* Recent Orders */}
 							<Card>
 								<CardHeader>
-									<CardTitle>Customer Management</CardTitle>
+									<CardTitle className='flex items-center gap-2'>
+										<ShoppingCartIcon /> Recent Orders
+									</CardTitle>
 								</CardHeader>
 								<CardContent>
 									<div className='space-y-4'>
-										{allUsers
-											.filter(user => user.role === 'customer')
-											.map(user => (
-												<div
-													key={user._id}
-													className='flex items-center justify-between p-4 border rounded-lg'
-												>
-													<div>
-														<p className='font-medium'>
-															{user.firstName} {user.lastName}
-														</p>
-														<p className='text-sm text-muted-foreground'>
-															{user.email}
-														</p>
-														<p className='text-xs text-muted-foreground'>
-															Joined:{' '}
-															{new Date(user.createdAt).toLocaleDateString()}
-														</p>
-													</div>
-													<div className='text-right'>
-														<Badge variant='outline' className='capitalize'>
-															{user.role}
-														</Badge>
-														<p className='text-sm text-muted-foreground mt-1'>
-															Orders:{' '}
-															{
-																orders.filter(
-																	order => order.customerEmail === user.email
-																).length
-															}
-														</p>
-													</div>
+										{recentOrders.map(order => (
+											<div
+												key={order._id}
+												className='flex justify-between p-3 border rounded-lg'
+											>
+												<div>
+													<p className='font-medium'>{order.email}</p>
+													<p className='text-sm text-muted-foreground'>
+														{order.shippingAddress.firstName}{' '}
+														{order.shippingAddress.lastName}
+													</p>
+													<p className='text-xs text-muted-foreground'>
+														{new Date(order.createdAt).toLocaleDateString()}
+													</p>
 												</div>
-											))}
-										{allUsers.filter(user => user.role === 'customer')
-											.length === 0 && (
-											<div className='text-center py-8 text-muted-foreground'>
-												No customers registered yet
+												<div className='text-right'>
+													<p className='font-medium'>
+														{formatPrice(order.total)}
+													</p>
+													<Badge
+														className={`text-xs ${getStatusColor(
+															order.status
+														)}`}
+													>
+														{order.status}
+													</Badge>
+												</div>
 											</div>
-										)}
+										))}
 									</div>
+									<Link href='/admin/orders'>
+										<Button variant='outline' className='w-full mt-4'>
+											View All Orders
+										</Button>
+									</Link>
 								</CardContent>
 							</Card>
 
-							{/* Recent Activity */}
+							{/* Top Products */}
 							<Card>
 								<CardHeader>
-									<CardTitle>Recent User Activity</CardTitle>
+									<CardTitle className='flex items-center gap-2'>
+										<TrendingUpIcon />
+										Top Products
+									</CardTitle>
 								</CardHeader>
 								<CardContent>
-									<div className='space-y-3'>
-										{activities.map(activity => (
+									<div className='space-y-4'>
+										{topProducts.map(product => (
 											<div
-												key={activity._id}
-												className='flex items-center gap-3 p-3 border rounded-lg'
+												key={product._id || product.id}
+												className='flex items-center justify-between p-3 border rounded-lg'
 											>
-												<div className='h-2 w-2 bg-green-500 rounded-full'></div>
-												<div className='flex-1'>
-													<p className='text-sm font-medium'>
-														{activity.userName}
+												<div>
+													<p className='font-medium'>{product.name}</p>
+													<p className='text-sm text-muted-foreground'>
+														{product.sales} sales
 													</p>
 													<p className='text-xs text-muted-foreground'>
-														{activity.details}
-													</p>
-													<p className='text-xs text-muted-foreground'>
-														{new Date(activity.timestamp).toLocaleString()}
+														Stock: {product.stock}
 													</p>
 												</div>
-												<Badge variant='outline' className='capitalize'>
-													{activity.action.replace('_', ' ')}
-												</Badge>
+												<div className='text-right'>
+													<p className='font-medium'>
+														{new Intl.NumberFormat('uz-UZ', {
+															style: 'currency',
+															currency: 'UZS',
+															currencyDisplay: 'code',
+															minimumFractionDigits: 0,
+														}).format(stats.totalRevenue)}
+													</p>
+													{product.stock < 10 && (
+														<Badge variant='destructive' className='text-xs'>
+															Low Stock
+														</Badge>
+													)}
+												</div>
 											</div>
 										))}
-										{activities.length === 0 && (
-											<div className='text-center py-8 text-muted-foreground'>
-												No recent activity
-											</div>
-										)}
 									</div>
+									<Link href='/admin/products'>
+										<Button
+											variant='outline'
+											className='w-full mt-4 bg-transparent'
+										>
+											View All Products
+										</Button>
+									</Link>
 								</CardContent>
 							</Card>
-						</div>
-					</TabsContent>
-				</Tabs>
+						</TabsContent>
+
+						<TabsContent value='customers'>
+							<div className='space-y-6'>
+								{/* Customer Stats */}
+								<div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+									<Card>
+										<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+											<CardTitle className='text-sm font-medium'>
+												Total Customers
+											</CardTitle>
+											<UsersIcon />
+										</CardHeader>
+										<CardContent>
+											<div className='text-2xl font-bold'>
+												{customerStats.totalCustomers}
+											</div>
+											<p className='text-xs text-muted-foreground'>
+												Registered users
+											</p>
+										</CardContent>
+									</Card>
+
+									<Card>
+										<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+											<CardTitle className='text-sm font-medium'>
+												New Customers
+											</CardTitle>
+											<UsersIcon />
+										</CardHeader>
+										<CardContent>
+											<div className='text-2xl font-bold'>
+												{customerStats.newCustomers}
+											</div>
+											<p className='text-xs text-muted-foreground'>
+												First-time buyers
+											</p>
+										</CardContent>
+									</Card>
+
+									<Card>
+										<CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
+											<CardTitle className='text-sm font-medium'>
+												Returning Customers
+											</CardTitle>
+											<UsersIcon />
+										</CardHeader>
+										<CardContent>
+											<div className='text-2xl font-bold'>
+												{customerStats.returningCustomers}
+											</div>
+											<p className='text-xs text-muted-foreground'>
+												Repeat buyers
+											</p>
+										</CardContent>
+									</Card>
+								</div>
+
+								{/* Customer List */}
+								<Card>
+									<CardHeader>
+										<CardTitle>Customer Management</CardTitle>
+									</CardHeader>
+									<CardContent>
+										<div className='space-y-4'>
+											{allUsers
+												.filter(user => user.role === 'customer')
+												.map(user => (
+													<div
+														key={user._id}
+														className='flex items-center justify-between p-4 border rounded-lg'
+													>
+														<div>
+															<p className='font-medium'>
+																{user.firstName} {user.lastName}
+															</p>
+															<p className='text-sm text-muted-foreground'>
+																{user.email}
+															</p>
+															<p className='text-xs text-muted-foreground'>
+																Joined:{' '}
+																{new Date(user.createdAt).toLocaleDateString()}
+															</p>
+														</div>
+														<div className='text-right'>
+															<Badge variant='outline' className='capitalize'>
+																{user.role}
+															</Badge>
+															<p className='text-sm text-muted-foreground mt-1'>
+																Orders:{' '}
+																{
+																	orders.filter(
+																		order => order.customerEmail === user.email
+																	).length
+																}
+															</p>
+														</div>
+													</div>
+												))}
+											{allUsers.filter(user => user.role === 'customer')
+												.length === 0 && (
+												<div className='text-center py-8 text-muted-foreground'>
+													No customers registered yet
+												</div>
+											)}
+										</div>
+									</CardContent>
+								</Card>
+
+								{/* Recent Activity */}
+								<Card>
+									<CardHeader>
+										<CardTitle>Recent User Activity</CardTitle>
+									</CardHeader>
+									<CardContent>
+										<div className='space-y-3'>
+											{activities.map(activity => (
+												<div
+													key={activity._id}
+													className='flex items-center gap-3 p-3 border rounded-lg'
+												>
+													<div className='h-2 w-2 bg-green-500 rounded-full'></div>
+													<div className='flex-1'>
+														<p className='text-sm font-medium'>
+															{activity.userName}
+														</p>
+														<p className='text-xs text-muted-foreground'>
+															{activity.details}
+														</p>
+														<p className='text-xs text-muted-foreground'>
+															{new Date(activity.timestamp).toLocaleString()}
+														</p>
+													</div>
+													<Badge variant='outline' className='capitalize'>
+														{activity.action.replace('_', ' ')}
+													</Badge>
+												</div>
+											))}
+											{activities.length === 0 && (
+												<div className='text-center py-8 text-muted-foreground'>
+													No recent activity
+												</div>
+											)}
+										</div>
+									</CardContent>
+								</Card>
+							</div>
+						</TabsContent>
+					</Tabs>
+				</div>
 			</div>
-		</div>
+		</AuthGuard>
 	)
 }

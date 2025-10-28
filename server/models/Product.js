@@ -24,7 +24,7 @@ const productSchema = new mongoose.Schema(
 		},
 		image: {
 			type: String,
-			default: '/diverse-products-still-life.png',
+			default: '/placeholder.svg',
 		},
 		stock: {
 			type: Number,

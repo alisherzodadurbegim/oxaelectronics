@@ -6,7 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
-import { OrderStore } from '@/lib/order-store'
+
 import axios from 'axios'
 import Cookies from 'js-cookie'
 import type React from 'react'
@@ -38,8 +38,6 @@ export default function RegisterPage() {
 	const [errors, setErrors] = useState<{ [key: string]: string }>({})
 	const [showSuccessModal, setShowSuccessModal] = useState(false)
 	const router = useRouter()
-
-	const orderStore = OrderStore.getInstance()
 
 	const handleInputChange = (field: string, value: string) => {
 		setFormData(prev => ({ ...prev, [field]: value }))
@@ -96,24 +94,30 @@ export default function RegisterPage() {
 		setIsLoading(true)
 
 		try {
-			const res = await axios.post('/api/auth/register', {
-				firstName: formData.firstName.trim(),
-				lastName: formData.lastName.trim(),
-				email: formData.email,
-				password: formData.password,
-				role: 'customer',
-			})
+			const res = await axios.post(
+				`${process.env.NEXT_PUBLIC_API_URL}/api/auth/register`,
+				{
+					firstName: formData.firstName.trim(),
+					lastName: formData.lastName.trim(),
+					email: formData.email,
+					password: formData.password,
+					role: 'customer',
+				},
+				{ withCredentials: true }
+			)
 
 			const user = res.data.user
 
 			if (res.data.success && user) {
-				orderStore.logActivity({
+				const auditPayload = {
 					userId: user.id,
 					userEmail: user.email,
 					userName: user.name,
 					action: 'register',
 					details: `New customer account created: ${user.name}`,
-				})
+				}
+				// send audit log (non-blocking)
+				// axios.post('/api/audit', auditPayload).catch(() => {})
 			}
 
 			if (res.data.success && user) {

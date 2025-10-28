@@ -13,6 +13,6 @@ router.get('/', protect, admin, getAllOrders)
 
 // Sipariş durumunu güncelleme (admin)
 router.put('/:id/status', protect, admin, updateOrderStatus)
-export default router
 
 router.post('/', protect, createOrder)
+export default router

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Separator } from '@/components/ui/separator'
-import { OrderStore } from '@/lib/order-store'
+
 import { ArrowLeft, CreditCard, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
@@ -21,8 +21,6 @@ const formatPrice = (price: number) => {
 export default function PaymentPage() {
 	const [showSuccessModal, setShowSuccessModal] = useState(false)
 	const [orderData, setOrderData] = useState<any>(null)
-
-	const orderStore = OrderStore.getInstance()
 
 	useEffect(() => {
 		const stored = localStorage.getItem('pendingOrder')

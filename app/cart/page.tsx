@@ -103,9 +103,12 @@ export default function CartPage() {
 
 	const fetchCart = async (userId: string) => {
 		try {
-			const { data } = await axios.get(`/api/cart`, {
-				params: { userId },
-			})
+			const { data } = await axios.get(
+				`${process.env.NEXT_PUBLIC_API_URL}/api/cart`,
+				{
+					params: { userId },
+				}
+			)
 			const items = data?.items ?? []
 			const normalized: CartItem[] = items.map(normalizeServerItem)
 			setCartItems(normalized)
@@ -125,7 +128,7 @@ export default function CartPage() {
 
 		if (user && user.id) {
 			try {
-				await axios.post(`/api/cart/add`, {
+				await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/cart/add`, {
 					userId: user.id,
 					productId,
 					quantity: newQty,
@@ -144,9 +147,12 @@ export default function CartPage() {
 
 		if (user && user.id) {
 			try {
-				await axios.delete(`/api/cart/remove/${productId}`, {
-					data: { userId: user.id },
-				})
+				await axios.delete(
+					`${process.env.NEXT_PUBLIC_API_URL}/api/cart/remove/${productId}`,
+					{
+						data: { userId: user.id },
+					}
+				)
 				await fetchCart(user.id)
 			} catch (err) {
 				console.error('Remove item failed', err)

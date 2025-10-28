@@ -77,7 +77,9 @@ export default function HomePage() {
 	const fetchProducts = async () => {
 		try {
 			setLoading(true)
-			const res = await axios.get('/api/products')
+			const res = await axios.get(
+				`${process.env.NEXT_PUBLIC_API_URL}/api/products`
+			)
 			setProducts(res.data)
 		} catch (err) {
 			console.error('Mahsulotlarni olib bo‘lmadi', err)
@@ -100,11 +102,21 @@ export default function HomePage() {
 		}
 	}, [])
 
-	const handleLogout = () => {
-		Cookies.remove('token')
-		Cookies.remove('user')
-		setUser(null)
-		router.push('/')
+	const handleLogout = async () => {
+		try {
+			await axios.post(
+				`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`,
+				{},
+				{ withCredentials: true } // 🍪 cookie bilan ishlaydi
+			)
+		} catch (error) {
+			console.error('Logout error:', error)
+		} finally {
+			Cookies.remove('token')
+			Cookies.remove('user')
+			setUser(null)
+			router.push('/')
+		}
 	}
 
 	const filteredProducts = products.filter(product => {
@@ -115,20 +127,7 @@ export default function HomePage() {
 			selectedCategory === 'All' || product.category === selectedCategory
 		return matchesSearch && matchesCategory
 	})
-	// useEffect(() => {
-	// 	const fetchCart = async () => {
-	// 		const cookieUser = Cookies.get('user')
-	// 		const storedUser = cookieUser ? JSON.parse(cookieUser) : null
-	// 		if (storedUser && storedUser.id) {
-	// 			const res = await axios.get(`/api/cart/${storedUser.id}`)
-	// 			setCartItems(res.data.items || [])
-	// 		} else {
-	// 			const localCart = JSON.parse(localStorage.getItem('cart') || '[]')
-	// 			setCartItems(localCart)
-	// 		}
-	// 	}
-	// 	fetchCart()
-	// }, [])
+
 	const addToCart = async (
 		productId: string,
 		name: string,
@@ -143,7 +142,7 @@ export default function HomePage() {
 		if (storedUser && storedUser.id) {
 			// Agar login qilingan bo‘lsa → serverga yozamiz
 			const existing = cartItems.find(item => item.productId === productId)
-			await axios.post('/api/cart/add', {
+			await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/cart/add`, {
 				userId: storedUser.id,
 				productId,
 				quantity: existing ? existing.quantity + 1 : 1,
@@ -433,7 +432,7 @@ export default function HomePage() {
 						product._id,
 						product.name,
 						product.price,
-						product.image || '/diverse-products-still-life.png'
+						product.image || '/placeholder.svg'
 					)
 				}
 			/>
@@ -492,7 +491,7 @@ export default function HomePage() {
 							key={product._id}
 							product={{
 								...product,
-								image_url: product.image || '/diverse-products-still-life.png',
+								image_url: product.image || '/placeholder.svg',
 								featured: product.featured?.toString() || 'false',
 								rating: product.rating || 4.5,
 							}}
@@ -503,7 +502,7 @@ export default function HomePage() {
 									product._id,
 									product.name,
 									product.price,
-									product.image || '/diverse-products-still-life.png'
+									product.image || '/placeholder.svg'
 								)
 							}
 							onProductClick={handleProductClick}

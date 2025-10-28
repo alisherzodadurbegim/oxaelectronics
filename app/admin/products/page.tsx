@@ -78,7 +78,9 @@ export default function ProductsPage() {
 
 	const fetchProducts = async () => {
 		try {
-			const res = await axios.get('/api/products')
+			const res = await axios.get(
+				`${process.env.NEXT_PUBLIC_API_URL}/api/products`
+			)
 			setProducts(res.data)
 		} catch (err) {
 			console.error('Mahsulotlarni olib bo‘lmadi', err)
@@ -139,13 +141,15 @@ export default function ProductsPage() {
 			price: Number(formData.price),
 			stock: Number(formData.stock),
 			description: formData.description,
-			image: formData.image || '/diverse-products-still-life.png',
+			image: formData.image || '/placeholder.svg',
 		}
 
 		try {
-			const res = await axios.post('/api/admin/products', productData, {
-				withCredentials: true,
-			})
+			const res = await axios.post(
+				`${process.env.NEXT_PUBLIC_API_URL}/api/admin/products`,
+				productData,
+				{ withCredentials: true }
+			)
 			console.log(res.data)
 			setProducts([...products, res.data])
 			resetForm()
@@ -175,8 +179,9 @@ export default function ProductsPage() {
 
 		try {
 			const res = await axios.put(
-				`/api/admin/products/${editingProduct._id}`,
-				updatedData
+				`${process.env.NEXT_PUBLIC_API_URL}/api/admin/products/${editingProduct._id}`,
+				updatedData,
+				{ withCredentials: true }
 			)
 
 			setProducts(
@@ -201,7 +206,10 @@ export default function ProductsPage() {
 
 		if (confirm(`Are you sure you want to delete "${product.name}"?`)) {
 			try {
-				await axios.delete(`/api/admin/products/${productId}`)
+				await axios.delete(
+					`${process.env.NEXT_PUBLIC_API_URL}/api/admin/products/${productId}`,
+					{ withCredentials: true }
+				)
 				setProducts(products.filter(p => p._id !== productId))
 				setSuccessMessage({
 					title: 'Product Deleted Successfully!',
@@ -478,7 +486,7 @@ export default function ProductsPage() {
 
 													try {
 														const res = await axios.post(
-															'/api/upload',
+															`${process.env.NEXT_PUBLIC_API_URL}/api/upload`,
 															formDataFile,
 															{
 																headers: {

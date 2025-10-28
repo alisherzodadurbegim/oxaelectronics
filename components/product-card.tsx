@@ -108,7 +108,7 @@ export function ProductCard({
 		)
 	}
 
-	const imageUrl = imageError ? '/product1.webp' : product.image_url
+	const imageUrl = imageError ? '/placeholder.svg' : product.image_url
 
 	return (
 		<Card
@@ -170,7 +170,7 @@ export function ProductCard({
 				</div>
 
 				{/* Product Info */}
-				<div className='p-4 space-y-2'>
+				<div className='p-4 space-y-2 relative'>
 					<div className='flex items-start justify-between'>
 						<h3 className='font-semibold text-sm line-clamp-2 flex-1'>
 							{product.name}
@@ -201,12 +201,25 @@ export function ProductCard({
 							)}
 						</div>
 					</div>
-					<div className='absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200'>
+					<div className='absolute bottom-2 left-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200'>
 						<Button
 							onClick={handleAddToCart}
 							disabled={product.stock === 0}
-							className='w-full'
 							size='sm'
+							className={`w-full relative overflow-hidden rounded-xl
+        backdrop-blur-xl 
+        bg-white/10 
+        border 
+        text-black font-semibold
+        shadow-[0_0_10px_rgba(255,255,255,0.1)]
+        hover:shadow-[0_0_25px_rgba(255,255,255,0.3)]
+        hover:bg-white/20
+        transition-all duration-500 ease-out
+        before:absolute before:inset-0 
+        before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent
+        before:translate-x-[-200%] hover:before:translate-x-[200%]
+        before:transition-transform before:duration-700
+        ${product.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
 						>
 							<ShoppingCart className='h-4 w-4 mr-2' />
 							{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
