@@ -137,50 +137,57 @@ export default function HomePage() {
 	) => {
 		const cookieUser = Cookies.get('user')
 		const storedUser = cookieUser ? JSON.parse(cookieUser) : null
-		console.log('cookieUser:', cookieUser)
-		console.log('storedUser:', storedUser)
-		if (storedUser && storedUser.id) {
-			// Agar login qilingan bo‘lsa → serverga yozamiz
-			const existing = cartItems.find(item => item.productId === productId)
-			await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/cart/add`, {
-				userId: storedUser.id,
-				productId,
-				quantity: existing ? existing.quantity + 1 : 1,
-			})
-		} else {
-			// Guest foydalanuvchi → localStorage ga yozamiz
-			const localCart = JSON.parse(localStorage.getItem('cart') || '[]')
-			const existing = localCart.find(
-				(item: any) => item.productId === productId
-			)
 
-			if (existing) {
-				existing.quantity += 1
-			} else {
-				localCart.push({
+		if (storedUser && storedUser.id) {
+			// 🟢 Login bo‘lgan user — backendga so‘rov
+			try {
+				const { data } = await axios.post<{
+					items: { productId: { _id: string }; quantity: number }[]
+				}>(`${process.env.NEXT_PUBLIC_API_URL}/api/cart/add`, {
+					userId: storedUser.id,
 					productId,
-					name,
-					price,
-					image,
 					quantity: 1,
 				})
+
+				setCartItems(
+					data.items.map(item => ({
+						productId: item.productId._id,
+						quantity: item.quantity,
+					}))
+				)
+			} catch (error) {
+				console.error('Serverga cart yuborishda xato:', error)
+			}
+		} else {
+			// 🟡 Guest user — localStorage
+			const localCart = JSON.parse(localStorage.getItem('cart') || '[]') as {
+				productId: string
+				name: string
+				price: number
+				image: string
+				quantity: number
+			}[]
+
+			const existingIndex = localCart.findIndex(i => i.productId === productId)
+
+			if (existingIndex > -1) {
+				// mavjud bo‘lsa, quantity ni oshiramiz
+				localCart[existingIndex].quantity += 1
+			} else {
+				// yangi mahsulot
+				localCart.push({ productId, name, price, image, quantity: 1 })
 			}
 
 			localStorage.setItem('cart', JSON.stringify(localCart))
+			setCartItems(
+				localCart.map(item => ({
+					productId: item.productId,
+					quantity: item.quantity,
+				}))
+			)
 		}
 
-		setCartItems(prev => {
-			const existing = prev.find(item => item.productId === productId)
-			if (existing) {
-				return prev.map(item =>
-					item.productId === productId
-						? { ...item, quantity: item.quantity + 1 }
-						: item
-				)
-			} else {
-				return [...prev, { productId, quantity: 1 }]
-			}
-		})
+		// 🪄 Animatsiya (ixtiyoriy)
 		if (e && cartIconRef.current) {
 			const productRect = (e.target as HTMLElement).getBoundingClientRect()
 			const cartRect = cartIconRef.current.getBoundingClientRect()
@@ -195,13 +202,12 @@ export default function HomePage() {
 			}
 
 			setFlyingImages(prev => [...prev, newFly])
-
-			// 1 sekunddan keyin listdan o‘chiramiz
 			setTimeout(() => {
 				setFlyingImages(prev => prev.filter(f => f.id !== newFly.id))
 			}, 1000)
 		}
 	}
+
 	useEffect(() => {
 		if (typeof window !== 'undefined') {
 			const saved = localStorage.getItem('wishlist')

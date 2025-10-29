@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import axios from 'axios'
+import Cookies from 'js-cookie'
 import { ArrowLeft, Truck } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -53,41 +54,55 @@ export default function CheckoutPage() {
 	const [total, setTotal] = useState(0)
 
 	useEffect(() => {
-		const sub = orderItems.reduce(
-			(acc, item) => acc + item.price * item.quantity,
-			0
-		)
-		const sh = 0 // Shippingni hozir Free deb belgilaymiz
-		const t = sub * 0.08 // tax 8% misol uchun
-		setSubtotal(sub)
-		setShipping(sh)
-		setTax(t)
-		setTotal(sub + sh + t)
-	}, [orderItems])
-
-	useEffect(() => {
 		async function fetchCartItems() {
-			const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+			const cookieUser = Cookies.get('user')
+			const storedUser = cookieUser ? JSON.parse(cookieUser) : null
 
-			const items = await Promise.all(
-				cart.map(async (item: { productId: string; quantity: number }) => {
-					const res = await axios.get(
-						`${process.env.NEXT_PUBLIC_API_URL}/api/products/${item.productId}`
-					)
-					return {
-						productId: res.data._id,
-						name: res.data.name,
-						price: res.data.price,
-						quantity: item.quantity,
+			if (storedUser && storedUser.id) {
+				// 🟢 login bo‘lgan user uchun serverdan olamiz
+				const { data } = await axios.get(
+					`${process.env.NEXT_PUBLIC_API_URL}/api/cart`,
+					{
+						params: { userId: storedUser.id },
 					}
-				})
-			)
+				)
 
-			setOrderItems(items)
+				const items = data.items.map((item: any) => ({
+					productId: item.productId._id,
+					name: item.productId.name,
+					price: item.productId.price,
+					quantity: item.quantity,
+				}))
+				setOrderItems(items)
+			} else {
+				// 🟡 Guest foydalanuvchi uchun localStorage
+				const cart = JSON.parse(localStorage.getItem('cart') || '[]')
+				setOrderItems(cart)
+			}
 		}
 
 		fetchCartItems()
 	}, [])
+	useEffect(() => {
+		if (orderItems.length > 0) {
+			// 🧮 subtotal — barcha mahsulotlarning umumiy narxi
+			const newSubtotal = orderItems.reduce(
+				(sum, item) => sum + item.price * item.quantity,
+				0
+			)
+
+			// 🚚 shipping — ixtiyoriy, agar kerak bo‘lsa 0 yoki 20000 qilib o‘rnating
+			// const newShipping = newSubtotal > 500000 ? 0 : 20000 // 500 mingdan oshsa — bepul yetkazish
+
+			// 💰 total — umumiy summa
+			const newTotal = newSubtotal
+
+			setSubtotal(newSubtotal)
+			// setShipping(newShipping)
+			setTotal(newTotal)
+		}
+	}, [orderItems])
+
 	const handleInputChange = (field: string, value: string) => {
 		setFormData(prev => ({ ...prev, [field]: value }))
 	}
