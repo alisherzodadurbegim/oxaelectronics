@@ -1,3 +1,4 @@
+import Navbar from '@/components/Navbar'
 import { Analytics } from '@vercel/analytics/next'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
@@ -19,6 +20,7 @@ export default function RootLayout({
 	return (
 		<html lang='en'>
 			<body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+				<Navbar />
 				{children}
 				<Analytics />
 			</body>

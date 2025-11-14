@@ -1,16 +1,16 @@
 'use client'
 
-import type React from 'react'
-
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Heart, ShoppingCart, Star } from 'lucide-react'
+import Link from 'next/link'
+import type React from 'react'
 import { useRef, useState } from 'react'
 
 interface ProductCardProps {
 	product: {
-		id: number
+		_id: string
 		name: string
 		description: string
 		price: number
@@ -111,102 +111,103 @@ export function ProductCard({
 	const imageUrl = imageError ? '/placeholder.svg' : product.image_url
 
 	return (
-		<Card
-			className='group cursor-pointer transition-all p-0 duration-200 hover:shadow-lg hover:-translate-y-1 overflow-hidden'
-			onClick={() => onProductClick(product)}
-		>
-			<CardContent className='p-0'>
-				{/* Image Container */}
-				<div className='relative aspect-[4/3] overflow-hidden bg-muted'>
-					<img
-						ref={imageRef}
-						src={imageUrl || '/placeholder.svg'}
-						alt={product.name}
-						className='w-full h-full object-cover transition-transform duration-200 group-hover:scale-105 my-0'
-						onError={() => setImageError(true)}
-					/>
-
-					{/* Badges */}
-					<div className='absolute top-2 left-2 flex flex-col space-y-1'>
-						{product.featured === 'true' && (
-							<Badge variant='destructive' className='text-xs'>
-								Featured
-							</Badge>
-						)}
-						{product.stock < 10 && product.stock > 0 && (
-							<Badge
-								variant='outline'
-								className='text-xs bg-orange-100 text-orange-800 border-orange-200'
-							>
-								Low Stock
-							</Badge>
-						)}
-						{product.stock === 0 && (
-							<Badge variant='secondary' className='text-xs'>
-								Out of Stock
-							</Badge>
-						)}
-					</div>
-
-					{/* Wishlist Button */}
-					<Button
-						variant='ghost'
-						size='sm'
-						className='absolute top-2 right-2 h-8 w-8 p-0 bg-background/80 hover:bg-background'
-						onClick={e => {
-							e.stopPropagation()
-							setIsWishlisted(prev => !prev)
-							onWishlistToggle()
-						}}
-					>
-						<Heart
-							className={`h-4 w-4 transition ${
-								isWishlisted
-									? 'fill-red-500 text-red-500'
-									: 'text-muted-foreground'
-							}`}
+		<Link href={`/product/${product._id}`}>
+			<Card
+				className='group cursor-pointer transition-all p-0 duration-200 hover:shadow-lg hover:-translate-y-1 overflow-hidden'
+				onClick={() => onProductClick(product)}
+			>
+				<CardContent className='p-0'>
+					{/* Image Container */}
+					<div className='relative aspect-[4/3] overflow-hidden bg-muted'>
+						<img
+							ref={imageRef}
+							src={imageUrl || '/placeholder.svg'}
+							alt={product.name}
+							className='w-full h-full object-cover transition-transform duration-200 group-hover:scale-105 my-0'
+							onError={() => setImageError(true)}
 						/>
-					</Button>
-				</div>
 
-				{/* Product Info */}
-				<div className='p-4 space-y-2 relative'>
-					<div className='flex items-start justify-between'>
-						<h3 className='font-semibold text-sm line-clamp-2 flex-1'>
-							{product.name}
-						</h3>
-					</div>
-
-					<p className='text-xs text-muted-foreground line-clamp-2'>
-						{product.description}
-					</p>
-
-					{renderRating()}
-
-					<div className='flex items-center justify-between pt-1'>
-						<div className='flex flex-col'>
-							<span className='text-lg font-bold text-primary'>
-								{formatPrice(product.price)}
-							</span>
-							<span className='text-xs text-muted-foreground'>
-								{product.category}
-							</span>
-						</div>
-
-						<div className='text-xs text-muted-foreground text-right'>
-							{product.stock > 0 ? (
-								<span>{product.stock} in stock</span>
-							) : (
-								<span className='text-destructive'>Out of stock</span>
+						{/* Badges */}
+						<div className='absolute top-2 left-2 flex flex-col space-y-1'>
+							{product.featured === 'true' && (
+								<Badge variant='destructive' className='text-xs'>
+									Featured
+								</Badge>
+							)}
+							{product.stock < 10 && product.stock > 0 && (
+								<Badge
+									variant='outline'
+									className='text-xs bg-orange-100 text-orange-800 border-orange-200'
+								>
+									Low Stock
+								</Badge>
+							)}
+							{product.stock === 0 && (
+								<Badge variant='secondary' className='text-xs'>
+									Out of Stock
+								</Badge>
 							)}
 						</div>
-					</div>
-					<div className='absolute bottom-2 left-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200'>
+
+						{/* Wishlist Button */}
 						<Button
-							onClick={handleAddToCart}
-							disabled={product.stock === 0}
+							variant='ghost'
 							size='sm'
-							className={`w-full relative overflow-hidden rounded-xl
+							className='absolute top-2 right-2 h-8 w-8 p-0 bg-background/80 hover:bg-background'
+							onClick={e => {
+								e.stopPropagation()
+								setIsWishlisted(prev => !prev)
+								onWishlistToggle()
+							}}
+						>
+							<Heart
+								className={`h-4 w-4 transition ${
+									isWishlisted
+										? 'fill-red-500 text-red-500'
+										: 'text-muted-foreground'
+								}`}
+							/>
+						</Button>
+					</div>
+
+					{/* Product Info */}
+					<div className='p-4 space-y-2 relative'>
+						<div className='flex items-start justify-between'>
+							<h3 className='font-semibold text-sm line-clamp-2 flex-1'>
+								{product.name}
+							</h3>
+						</div>
+
+						<p className='text-xs text-muted-foreground line-clamp-2'>
+							{product.description}
+						</p>
+
+						{renderRating()}
+
+						<div className='flex items-center justify-between pt-1'>
+							<div className='flex flex-col'>
+								<span className='text-lg font-bold text-primary'>
+									{formatPrice(product.price)}
+								</span>
+								<span className='text-xs text-muted-foreground'>
+									{product.category}
+								</span>
+							</div>
+
+							<div className='text-xs text-muted-foreground text-right'>
+								{product.stock > 0 ? (
+									<span>{product.stock} in stock</span>
+								) : (
+									<span className='text-destructive'>Out of stock</span>
+								)}
+							</div>
+						</div>
+						<div className='absolute bottom-2 left-2 right-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200'>
+							<Button
+								onClick={handleAddToCart}
+								disabled={product.stock === 0}
+								size='sm'
+								className={`w-full relative overflow-hidden rounded-xl
         backdrop-blur-xl 
         bg-white/10 
         border 
@@ -220,13 +221,14 @@ export function ProductCard({
         before:translate-x-[-200%] hover:before:translate-x-[200%]
         before:transition-transform before:duration-700
         ${product.stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-						>
-							<ShoppingCart className='h-4 w-4 mr-2' />
-							{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
-						</Button>
+							>
+								<ShoppingCart className='h-4 w-4 mr-2' />
+								{product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
+							</Button>
+						</div>
 					</div>
-				</div>
-			</CardContent>
-		</Card>
+				</CardContent>
+			</Card>
+		</Link>
 	)
 }

@@ -17,7 +17,7 @@ const formatPrice = (price: number) => {
 	return new Intl.NumberFormat('uz-UZ', {
 		style: 'currency',
 		currency: 'UZS',
-		currencyDisplay: 'code', // har doim "UZS" bo‘ladi, "so‘m" emas
+		currencyDisplay: 'code',
 		minimumFractionDigits: 0,
 	}).format(price)
 }
@@ -91,14 +91,12 @@ export default function CheckoutPage() {
 				0
 			)
 
-			// 🚚 shipping — ixtiyoriy, agar kerak bo‘lsa 0 yoki 20000 qilib o‘rnating
-			// const newShipping = newSubtotal > 500000 ? 0 : 20000 // 500 mingdan oshsa — bepul yetkazish
+			// const newShipping = newSubtotal > 500000 ? 0 : 20000 // 500 mingdan
 
-			// 💰 total — umumiy summa
 			const newTotal = newSubtotal
 
 			setSubtotal(newSubtotal)
-			// setShipping(newShipping)
+
 			setTotal(newTotal)
 		}
 	}, [orderItems])

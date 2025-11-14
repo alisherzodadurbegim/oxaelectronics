@@ -1,21 +1,12 @@
 'use client'
 import { HeroSlider } from '@/components/hero-slider'
 import { ProductCard } from '@/components/product-card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import WishlistSidebar from '@/components/wishlist-sidebar'
 import axios from 'axios'
 import Cookies from 'js-cookie'
-import {
-	Heart,
-	Languages,
-	LogOut,
-	Menu,
-	Search,
-	ShoppingCart,
-	User,
-} from 'lucide-react'
+import { Languages, LogOut, Search, User } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
@@ -251,7 +242,7 @@ export default function HomePage() {
 	return (
 		<div className='min-h-screen bg-background'>
 			{/* Header */}
-			<header className='sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+			{/* <header className='sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
 				<div className='container mx-auto px-4 sm:px-6 lg:px-8'>
 					<div className='flex h-16 items-center justify-between'>
 						<div className='flex items-center gap-6'>
@@ -345,7 +336,7 @@ export default function HomePage() {
 						</div>
 					</div>
 				</div>
-			</header>
+			</header> */}
 			{sidebarOpen && (
 				<div
 					onClick={() => setSidebarOpen(false)}
@@ -653,15 +644,7 @@ export default function HomePage() {
 						</div>
 					</div>
 					<div className='border-t mt-8 pt-8 text-center text-muted-foreground'>
-						<p>
-							&copy; 2025 OXA electronics. Created by{' '}
-							<a
-								className='underline hover:text-foreground dark:hover:text-foreground ease-in-out duration-200'
-								href='https://t.me/alianasia'
-							>
-								Durbegim
-							</a>{' '}
-						</p>
+						<p>&copy; 2025 OXA electronics. All rights reserved.</p>
 					</div>
 				</div>
 			</footer>

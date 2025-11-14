@@ -116,7 +116,7 @@ export default function RegisterPage() {
 					action: 'register',
 					details: `New customer account created: ${user.name}`,
 				}
-				// send audit log (non-blocking)
+
 				// axios.post('/api/audit', auditPayload).catch(() => {})
 			}
 
